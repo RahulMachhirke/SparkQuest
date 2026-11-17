@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPARK QUEST | BYTE LOGIC — Round 1 Technical Portal</title>
+
+  <!-- Google Fonts: Inter & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;700&family=Inter:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Pure Vanilla CSS with Official Palette -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="brand-wrapper" onclick="App.switchTab('overview')">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div>
+            <span class="brand-title">SPARK QUEST</span>
+            <span class="brand-tag">| BYTE LOGIC</span>
+          </div>
+          <div class="brand-sub">Technospark Club </div>
+        </div>
+      </div>
+
+      <!-- Main Navigation Menu -->
+      <nav class="nav-menu">
+        <button class="nav-link active" data-tab="overview">
+          <span>Overview</span>
+        </button>
+        <button class="nav-link" data-tab="quiz">
+          <span>Round 1: Rapid Fire</span>
+          <span class="nav-badge">Kahoot</span>
+        </button>
+        <button class="nav-link" data-tab="leaderboard">
+          <span>Live Leaderboard</span>
+          <span class="nav-badge">Live</span>
+        </button>
+      </nav>
+
+      <!-- User Auth Profile Badge -->
+      <div id="user-profile-badge">
+        <!-- Rendered dynamically by js/auth.js -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="main-content">
+
+    <!-- ============================================================== -->
+    <!-- TAB 1: OVERVIEW & RULES VIEW                                   -->
+    <!-- ============================================================== -->
+    <section id="view-overview" class="tab-view">
+      <div class="hero-banner">
+        <div class="hero-dept-tag">
+          ⚡ Department of Information Technology • Technospark Club
+        </div>
+        <h1 class="hero-title">
+          <span class="title-white">SPARK QUEST</span>
+          <span class="title-yellow">| BYTE LOGIC</span>
+        </h1>
+        <p class="hero-desc">
+          Pimpri Chinchwad College of Engineering and Research (PCCOER), Ravet.<br />
+          Official competition platform for <strong>Round 1: Rapid Fire</strong> online technical challenge, live speed
+          scoring, and real-time standings.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="App.switchTab('quiz')">
+            <span>🔥 Launch Round 1 Quiz</span>
+          </button>
+          <button class="btn btn-outline" onclick="App.switchTab('leaderboard')">
+            <span>🏆 View Live Leaderboard</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feature Highlights -->
+      <div class="panel">
+        <h2 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.5rem;">Core Competition Features</h2>
+        <div class="features-grid">
+          <div class="feature-box">
+            <h3>🔐 Authentication</h3>
+            <p>Team ID and passcode verification for enrolled student teams, plus organizer administrative access.</p>
+          </div>
+          <div class="feature-box">
+            <h3>⚡ Kahoot-Style Round 1</h3>
+            <p>25–30 fast-paced questions featuring single-correct MCQs and multi-select questions with speed-weighted
+              scoring.</p>
+          </div>
+          <div class="feature-box">
+            <h3>📊 Live Leaderboard</h3>
+            <p>Automatic real-time sync from quiz submissions combined with judge manual score adjustments and
+              tie-breaking metrics.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Round 1 Rules & Guidelines -->
+      <div class="panel">
+        <h2 style="font-size: 1.15rem; color: var(--color-yellow); margin-bottom: 0.75rem;">
+          📋 Round 1: Rapid Fire — Official Instructions
+        </h2>
+        <ul style="font-size: 0.85rem; color: #cbd5e1; padding-left: 1.25rem; line-height: 1.7;">
+          <li><strong>Question Count:</strong> 25–30 technical questions on programming fundamentals, core technical
+            concepts, and general computing knowledge.</li>
+          <li><strong>Question Formats:</strong> Includes both <em>single-correct multiple choice</em> (🔘) and
+            <em>multiple-select questions</em> (☑️ choose all that apply).</li>
+          <li><strong>Time Limit:</strong> Each question carries an allocated countdown timer (typically 15 to 25
+            seconds).</li>
+          <li><strong>Speed Scoring:</strong> Correct answers submitted faster receive higher points (up to 1,000 points
+            per question) plus streak multiplier bonuses.</li>
+          <li><strong>Tie-Breaking Method:</strong> If two teams tie on total points, the team with the <strong>lower
+              overall completion time</strong> ranks higher.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: ROUND 1 KAHOOT QUIZ VIEW                               -->
+    <!-- ============================================================== -->
+    <section id="view-quiz" class="tab-view" style="display: none;">
+      <div class="quiz-container">
+
+        <!-- Intro Card Before Starting Quiz -->
+        <div id="quiz-intro-card" class="panel" style="text-align: center; padding: 3rem 1.5rem;">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚡</div>
+          <h2 style="font-size: 1.8rem; font-weight: 900; color: #ffffff; margin-bottom: 0.5rem;">
+            Round 1: Rapid Fire Arena
+          </h2>
+          <p style="color: #94a3b8; font-size: 0.9rem; max-width: 500px; margin: 0 auto 1.5rem;">
+            Test your programming fundamentals and technical speed. Questions feature single-correct and multiple-select
+            formats.
+          </p>
+
+          <div
+            style="display: inline-block; background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 10px; padding: 0.85rem 1.5rem; margin-bottom: 1.75rem; text-align: left; font-size: 0.8rem;">
+            <div style="color: var(--color-sky); font-weight: 700; margin-bottom: 0.3rem;">Competition Rules:</div>
+            <div style="color: #cbd5e1;">• Fast answers = higher score multiplier</div>
+            <div style="color: #cbd5e1;">• For multi-select, check all correct options and hit submit</div>
+            <div style="color: #cbd5e1;">• Final score automatically syncs to the Live Leaderboard</div>
+          </div>
+
+          <div>
+            <button class="btn btn-primary" style="padding: 0.8rem 2rem; font-size: 1rem;" onclick="Quiz.start()">
+              🚀 Begin Rapid Fire Quiz
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Quiz Arena (Active during test) -->
+        <div id="quiz-arena" style="display: none;">
+          <!-- Top Status Bar -->
+          <div class="quiz-header-bar">
+            <div class="quiz-meta-group">
+              <span class="quiz-pill" id="quiz-q-num">1 / 25</span>
+              <span style="color: var(--color-sky); font-weight: 700;" id="quiz-category">Category</span>
+              <span class="quiz-streak" id="quiz-streak-pill" style="display: none;">🔥 Streak!</span>
+            </div>
+            <div>
+              <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Score: </span>
+              <span class="quiz-score-val" id="quiz-current-score">0</span>
+            </div>
+          </div>
+
+          <!-- Countdown Timer Bar -->
+          <div class="timer-track">
+            <div class="timer-fill" id="quiz-timer-bar"></div>
+          </div>
+
+          <!-- Question Display Panel -->
+          <div class="question-panel">
+            <div class="timer-bubble">
+              ⏱️ <span id="quiz-timer-text">20s</span>
+            </div>
+            <div class="format-indicator" id="quiz-format-badge">
+              <!-- Rendered as Single or Multi-Select -->
+            </div>
+            <h3 class="question-text" id="quiz-question-text">
+              Question text goes here
+            </h3>
+
+            <!-- Monospace Code Box (if question contains code) -->
+            <div class="code-snippet-box" id="quiz-code-box" style="display: none;">
+              <pre></pre>
+            </div>
+          </div>
+
+          <!-- Kahoot 4-Grid Answer Cards -->
+          <div class="kahoot-grid" id="quiz-options-grid">
+            <!-- Rendered by js/quiz.js -->
+          </div>
+
+          <!-- Multi-Select Submit Button -->
+          <div class="multi-submit-wrapper">
+            <button id="quiz-multi-submit-btn" class="btn btn-teal"
+              style="display: none; padding: 0.75rem 2rem; font-size: 0.95rem;" onclick="Quiz.submitMultiSelect()">
+              ✓ Submit Multi-Select Answer
+            </button>
+          </div>
+
+          <!-- Answer Feedback Drawer -->
+          <div id="quiz-feedback-bar" class="feedback-bar" style="display: none;">
+            <div class="feedback-header">
+              <span class="feedback-title" id="feedback-title">Correct!</span>
+              <span class="feedback-points" id="feedback-points">+1,000 pts</span>
+            </div>
+            <p class="feedback-explanation" id="feedback-explanation"></p>
+            <button class="btn btn-primary" onclick="Quiz.nextQuestion()">
+              <span>Next Question ➔</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quiz Completion Result Card -->
+        <div id="quiz-result-card" class="result-card" style="display: none;">
+          <div class="result-trophy">🏆</div>
+          <h2 style="font-size: 1.8rem; font-weight: 900; color: #ffffff;">Round 1 Finished!</h2>
+          <p style="color: var(--color-sky); font-weight: 700; margin-top: 0.25rem;" id="result-team-name">
+            Team Name
+          </p>
+
+          <div class="result-score-box">
+            <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">
+              Total Rapid-Fire Score
+            </div>
+            <div class="result-score-val" id="result-final-score">0</div>
+            <div
+              style="display: flex; justify-content: space-around; border-top: 1px solid var(--color-border); padding-top: 0.75rem; margin-top: 0.75rem; font-size: 0.8rem;">
+              <div>
+                <span style="color: #94a3b8;">Accuracy: </span>
+                <strong style="color: #34d399;" id="result-accuracy">100%</strong>
+              </div>
+              <div>
+                <span style="color: #94a3b8;">Total Time: </span>
+                <strong style="color: var(--color-sky);" id="result-time">0s</strong>
+              </div>
+            </div>
+          </div>
+
+          <p style="font-size: 0.8rem; color: #34d399; margin-bottom: 1.5rem;">
+            ✓ Score and tie-breaker completion time have been recorded to the Live Leaderboard!
+          </p>
+
+          <div style="display: flex; justify-content: center; gap: 1rem;">
+            <button class="btn btn-outline" onclick="Quiz.start()">
+              🔄 Retake Demo Quiz
+            </button>
+            <button class="btn btn-primary" onclick="App.switchTab('leaderboard')">
+              🏆 View Live Standings
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: LIVE LEADERBOARD VIEW                                   -->
+    <!-- ============================================================== -->
+    <section id="view-leaderboard" class="tab-view" style="display: none;">
+      <div class="panel">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 900; color: #ffffff;">Live Competition Leaderboard</h2>
+            <p style="font-size: 0.8rem; color: #94a3b8;">
+              Live automatic updates from Round 1 quiz submissions + judge manual point insertions.
+            </p>
+          </div>
+          <button class="btn btn-outline-teal" onclick="Leaderboard.exportCSV()">
+            📥 Export CSV
+          </button>
+        </div>
+
+        <!-- Activity Ticker -->
+        <div class="activity-ticker">
+          <span class="ticker-label">⚡ Live Feed:</span>
+          <div class="ticker-content" id="activity-ticker-content">
+            <!-- Rendered by js/leaderboard.js -->
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="leaderboard-toolbar">
+          <div class="search-box">
+            <span style="margin-right: 0.5rem; color: #64748b;">🔍</span>
+            <input type="text" id="leaderboard-search" placeholder="Search team, member, or college..." />
+          </div>
+
+          <select id="leaderboard-filter" class="filter-select">
+            <option value="all">All Enrolled Teams</option>
+            <option value="pccoer">PCCOER Ravet Teams</option>
+            <option value="external">Visiting Colleges</option>
+          </select>
+        </div>
+
+        <!-- Standings Table -->
+        <div class="table-responsive">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th style="width: 70px; text-align: center;">Rank</th>
+                <th>Team & Participants</th>
+                <th class="numeric-col">Round 1 (Quiz)</th>
+                <th class="numeric-col">Manual Adjust</th>
+                <th class="numeric-col">Tie-Breaker Time</th>
+                <th class="numeric-col">Total Score</th>
+                <th style="text-align: center; width: 100px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody">
+              <!-- Rendered by js/leaderboard.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: TEAM & ADMIN AUTHENTICATION                             -->
+  <!-- ============================================================== -->
+  <div id="login-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🔑 Portal Authentication</h3>
+        <button class="modal-close-btn" onclick="App.closeLoginModal()">✕</button>
+      </div>
+
+      <div id="login-status-msg"></div>
+
+      <!-- Quick Team Switcher for Developers -->
+      <div
+        style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem;">
+        <label
+          style="font-size: 0.75rem; font-weight: 700; color: var(--color-yellow); display: block; margin-bottom: 0.3rem;">
+          ⚡ Quick Developer Switcher (1-Click Test):
+        </label>
+        <select id="quick-team-select" class="filter-select" style="width: 100%;"
+          onchange="App.handleQuickTeamLogin(this.value)">
+          <!-- Populated by App.populateQuickTeamSelect() -->
+        </select>
+      </div>
+
+      <!-- Team Login Form -->
+      <form onsubmit="App.handleTeamLoginSubmit(event)" style="margin-bottom: 1.25rem;">
+        <div style="font-size: 0.8rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">
+          Team Login
+        </div>
+        <div class="form-group">
+          <label for="login-team-id">Team ID (e.g. team-01)</label>
+          <input type="text" id="login-team-id" placeholder="team-01" required />
+        </div>
+        <div class="form-group">
+          <label for="login-team-pass">Passcode</label>
+          <input type="password" id="login-team-pass" placeholder="team01" required />
+        </div>
+        <button type="submit" class="btn btn-teal" style="width: 100%;">
+          Sign In as Team
+        </button>
+      </form>
+
+      <!-- Admin Passkey Form -->
+      <form onsubmit="App.handleAdminLoginSubmit(event)"
+        style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
+        <div style="font-size: 0.8rem; font-weight: 800; color: var(--color-orange); margin-bottom: 0.5rem;">
+          Organizer / Faculty Admin Login
+        </div>
+        <div class="form-group">
+          <label for="login-admin-key">Admin Security Key</label>
+          <input type="password" id="login-admin-key" placeholder="sparkadmin2026" required />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          Verify Admin Access
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: MANUAL SCORE INSERTION / ADJUSTMENT                     -->
+  <!-- ============================================================== -->
+  <div id="manual-score-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>✏️ Manual Score Insertion / Adjustment</h3>
+        <button class="modal-close-btn" onclick="Leaderboard.closeManualModal()">✕</button>
+      </div>
+
+      <form onsubmit="Leaderboard.submitManualModal(event)">
+        <input type="hidden" id="manual-modal-team-id" />
+
+        <div
+          style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.8rem;">
+          <div><span style="color: #94a3b8;">Team: </span><strong style="color: #ffffff;"
+              id="manual-modal-team-name"></strong></div>
+          <div><span style="color: #94a3b8;">College: </span><span style="color: var(--color-sky);"
+              id="manual-modal-college"></span></div>
+          <div><span style="color: #94a3b8;">Round 1 Quiz Score: </span><span style="color: var(--color-yellow);"
+              id="manual-modal-r1-score"></span></div>
+        </div>
+
+        <div class="form-group">
+          <label for="manual-modal-points">
+            Manual Points Adjustment (+ or -)
+          </label>
+          <input type="number" id="manual-modal-points" placeholder="e.g. 100 or -25" required />
+          <span style="font-size: 0.65rem; color: #94a3b8;">
+            Enter positive numbers to award bonus/judge points, or negative numbers for penalties.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="manual-modal-reason">Reason / Note for Adjustment</label>
+          <input type="text" id="manual-modal-reason" placeholder="e.g. Faculty verification, tie-break adjustment" />
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-outline" onclick="Leaderboard.closeManualModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Save & Update Leaderboard
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Site Footer with Palette Swatch -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div>
+        <strong>SPARK QUEST | BYTE LOGIC</strong> • Technospark Club, Dept. of Information Technology, PCCOER Ravet.
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 0.7rem;">Brand Palette:</span>
+        <div class="palette-swatch" title="Refreshing Summer: Sky, Teal, Navy, Yellow, Orange">
+          <div class="swatch-color" style="background: #8ECAE6;"></div>
+          <div class="swatch-color" style="background: #219EBC;"></div>
+          <div class="swatch-color" style="background: #023047;"></div>
+          <div class="swatch-color" style="background: #FFB703;"></div>
+          <div class="swatch-color" style="background: #FB8500;"></div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Scripts (Clean Modular Structure) -->
+  <script src="js/config.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/teams.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/leaderboard.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>

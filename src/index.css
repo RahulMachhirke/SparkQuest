@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-dark text-slate-100 font-sans antialiased min-h-screen selection:bg-brand-yellow selection:text-brand-navy;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #022030;
+}
+::-webkit-scrollbar-thumb {
+  background: #219EBC;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8ECAE6;
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+  background: rgba(2, 48, 71, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(142, 202, 230, 0.15);
+}
+
+.glass-card {
+  background: rgba(3, 37, 55, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(33, 158, 188, 0.25);
+}
+
+.glow-orange {
+  box-shadow: 0 0 25px -5px rgba(251, 133, 0, 0.35);
+}
+
+.glow-teal {
+  box-shadow: 0 0 25px -5px rgba(33, 158, 188, 0.35);
+}
+
+.glow-yellow {
+  box-shadow: 0 0 25px -5px rgba(255, 183, 3, 0.35);
+}
