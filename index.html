@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SPARK QUEST | BYTE LOGIC — Technical Championship</title>
-  
+
   <!-- Google Fonts: Inter & Fira Code -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;700&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;700&family=Inter:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet">
+
   <!-- Modern Responsive Stylesheet with 5-Color Palette -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
 
   <!-- Sticky Site Header -->
@@ -25,7 +29,7 @@
             <span class="brand-title">SPARK QUEST</span>
             <span class="brand-tag">| BYTE LOGIC</span>
           </div>
-          <span class="brand-sub">Technospark Club • Dept. of IT, PCCOER Ravet</span>
+          <span class="brand-sub">Technospark Club </span>
         </div>
       </div>
 
@@ -65,8 +69,9 @@
           <span class="title-yellow">| BYTE LOGIC</span>
         </h1>
         <p class="hero-desc">
-          Pimpri Chinchwad College of Engineering and Research (PCCOER), Ravet.<br/>
-          Official competition portal for <strong>Round 1: Rapid Fire</strong> online technical challenge, live speed scoring, and real-time standings.
+          Pimpri Chinchwad College of Engineering and Research (PCCOER), Ravet.<br />
+          Official competition portal for <strong>Round 1: Rapid Fire</strong> online technical challenge, live speed
+          scoring, and real-time standings.
         </p>
         <div class="hero-actions">
           <button class="btn btn-primary" onclick="App.switchTab('quiz')">
@@ -84,15 +89,18 @@
         <div class="features-grid">
           <div class="feature-box">
             <h3>🔐 Role-Based Access</h3>
-            <p>Participants log in with Team ID and passcode. Administrative tools and manual adjustments remain strictly hidden from participant screens.</p>
+            <p>Participants log in with Team ID and passcode. Administrative tools and manual adjustments remain
+              strictly hidden from participant screens.</p>
           </div>
           <div class="feature-box">
             <h3>⚡ Kahoot-Style Round 1</h3>
-            <p>Rapid-fire questions featuring both single-correct MCQs and multi-select formats with speed-weighted multipliers and streak combos.</p>
+            <p>Rapid-fire questions featuring both single-correct MCQs and multi-select formats with speed-weighted
+              multipliers and streak combos.</p>
           </div>
           <div class="feature-box">
             <h3>📊 Live Leaderboard</h3>
-            <p>Automatic real-time sync from quiz submissions combined with judge manual adjustments and tie-breaker sorting.</p>
+            <p>Automatic real-time sync from quiz submissions combined with judge manual adjustments and tie-breaker
+              sorting.</p>
           </div>
         </div>
       </div>
@@ -103,10 +111,15 @@
           📋 Round 1: Rapid Fire — Competition Guidelines
         </h2>
         <ul style="font-size: 0.85rem; color: #cbd5e1; padding-left: 1.25rem; line-height: 1.7;">
-          <li><strong>Format:</strong> 25–30 technical questions on programming fundamentals, core technical concepts, and general computing knowledge.</li>
-          <li><strong>Question Types:</strong> Includes both <em>single-correct multiple choice</em> (🔘) and <em>multiple-select questions</em> (☑️ choose all that apply).</li>
-          <li><strong>Speed Scoring:</strong> Correct answers submitted faster receive higher points (up to 1,000 points per question) plus streak multiplier bonuses.</li>
-          <li><strong>Tie-Breaking Rule:</strong> If two teams tie on total points, the team with the <strong>lower overall completion time</strong> ranks higher.</li>
+          <li><strong>Format:</strong> 25–30 technical questions on programming fundamentals, core technical concepts,
+            and general computing knowledge.</li>
+          <li><strong>Question Types:</strong> Includes both <em>single-correct multiple choice</em> (🔘) and
+            <em>multiple-select questions</em> (☑️ choose all that apply).
+          </li>
+          <li><strong>Speed Scoring:</strong> Correct answers submitted faster receive higher points (up to 1,000 points
+            per question) plus streak multiplier bonuses.</li>
+          <li><strong>Tie-Breaking Rule:</strong> If two teams tie on total points, the team with the <strong>lower
+              overall completion time</strong> ranks higher.</li>
         </ul>
       </div>
     </section>
@@ -124,10 +137,12 @@
             Round 1: Rapid Fire Arena
           </h2>
           <p style="color: #94a3b8; font-size: 0.9rem; max-width: 520px; margin: 0 auto 1.5rem;">
-            Test your programming fundamentals and technical speed. Questions feature single-correct and multiple-select formats.
+            Test your programming fundamentals and technical speed. Questions feature single-correct and multiple-select
+            formats.
           </p>
 
-          <div style="display: inline-block; background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 12px; padding: 1rem 1.75rem; margin-bottom: 1.75rem; text-align: left; font-size: 0.82rem;">
+          <div
+            style="display: inline-block; background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 12px; padding: 1rem 1.75rem; margin-bottom: 1.75rem; text-align: left; font-size: 0.82rem;">
             <div style="color: var(--color-sky); font-weight: 700; margin-bottom: 0.35rem;">Competition Rules:</div>
             <div style="color: #cbd5e1;">• Fast answers = higher score multiplier</div>
             <div style="color: #cbd5e1;">• For multi-select, check all correct options and hit submit</div>
@@ -168,7 +183,7 @@
             </div>
             <div style="margin-bottom: 0.75rem;" id="quiz-format-badge"></div>
             <h3 class="question-text" id="quiz-question-text">Question text</h3>
-            
+
             <div class="code-snippet-box" id="quiz-code-box" style="display: none;">
               <pre></pre>
             </div>
@@ -179,12 +194,8 @@
 
           <!-- Multi-Select Submit Button -->
           <div style="margin-top: 1.25rem; text-align: center;">
-            <button 
-              id="quiz-multi-submit-btn" 
-              class="btn btn-teal" 
-              style="display: none; padding: 0.75rem 2rem; font-size: 0.95rem;"
-              onclick="Quiz.submitMultiSelect()"
-            >
+            <button id="quiz-multi-submit-btn" class="btn btn-teal"
+              style="display: none; padding: 0.75rem 2rem; font-size: 0.95rem;" onclick="Quiz.submitMultiSelect()">
               ✓ Submit Multi-Select Answer
             </button>
           </div>
@@ -215,7 +226,8 @@
               Total Rapid-Fire Score
             </div>
             <div class="result-score-val" id="result-final-score">0</div>
-            <div style="display: flex; justify-content: space-around; border-top: 1px solid var(--color-border); padding-top: 0.85rem; margin-top: 0.85rem; font-size: 0.82rem;">
+            <div
+              style="display: flex; justify-content: space-around; border-top: 1px solid var(--color-border); padding-top: 0.85rem; margin-top: 0.85rem; font-size: 0.82rem;">
               <div>
                 <span style="color: #94a3b8;">Accuracy: </span>
                 <strong style="color: #34d399;" id="result-accuracy">100%</strong>
@@ -249,7 +261,8 @@
     <!-- ============================================================== -->
     <section id="view-leaderboard" class="tab-view" style="display: none;">
       <div class="panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
           <div>
             <h2 style="font-size: 1.45rem; font-weight: 900; color: #ffffff;">Live Competition Standings</h2>
             <p style="font-size: 0.8rem; color: #94a3b8;">
@@ -313,11 +326,14 @@
       <div id="login-status-msg"></div>
 
       <!-- Quick Dev Switcher for Local Testing -->
-      <div style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 10px; padding: 0.75rem; margin-bottom: 1.25rem;">
-        <label style="font-size: 0.72rem; font-weight: 700; color: var(--color-yellow); display: block; margin-bottom: 0.3rem;">
+      <div
+        style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 10px; padding: 0.75rem; margin-bottom: 1.25rem;">
+        <label
+          style="font-size: 0.72rem; font-weight: 700; color: var(--color-yellow); display: block; margin-bottom: 0.3rem;">
           ⚡ Quick Developer Switcher (1-Click Test):
         </label>
-        <select id="quick-team-select" class="filter-select" style="width: 100%;" onchange="App.handleQuickTeamLogin(this.value)">
+        <select id="quick-team-select" class="filter-select" style="width: 100%;"
+          onchange="App.handleQuickTeamLogin(this.value)">
           <!-- Populated by App.populateQuickTeamSelect() -->
         </select>
       </div>
@@ -341,7 +357,8 @@
       </form>
 
       <!-- Admin Passkey Form -->
-      <form onsubmit="App.handleAdminLoginSubmit(event)" style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
+      <form onsubmit="App.handleAdminLoginSubmit(event)"
+        style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
         <div style="font-size: 0.8rem; font-weight: 800; color: var(--color-orange); margin-bottom: 0.5rem;">
           Organizer / Faculty Admin Login
         </div>
@@ -369,10 +386,14 @@
       <form onsubmit="Leaderboard.submitManualModal(event)">
         <input type="hidden" id="manual-modal-team-id" />
 
-        <div style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 10px; padding: 0.85rem; margin-bottom: 1rem; font-size: 0.8rem;">
-          <div><span style="color: #94a3b8;">Team: </span><strong style="color: #ffffff;" id="manual-modal-team-name"></strong></div>
-          <div><span style="color: #94a3b8;">College: </span><span style="color: var(--color-sky);" id="manual-modal-college"></span></div>
-          <div><span style="color: #94a3b8;">Round 1 Quiz Score: </span><span style="color: var(--color-yellow);" id="manual-modal-r1-score"></span></div>
+        <div
+          style="background: var(--color-dark); border: 1px solid var(--color-border); border-radius: 10px; padding: 0.85rem; margin-bottom: 1rem; font-size: 0.8rem;">
+          <div><span style="color: #94a3b8;">Team: </span><strong style="color: #ffffff;"
+              id="manual-modal-team-name"></strong></div>
+          <div><span style="color: #94a3b8;">College: </span><span style="color: var(--color-sky);"
+              id="manual-modal-college"></span></div>
+          <div><span style="color: #94a3b8;">Round 1 Quiz Score: </span><span style="color: var(--color-yellow);"
+              id="manual-modal-r1-score"></span></div>
         </div>
 
         <div class="form-group">
@@ -406,7 +427,7 @@
   <footer class="site-footer">
     <div class="footer-container">
       <div>
-        <strong>SPARK QUEST | BYTE LOGIC</strong> • Technospark Club, Dept. of Information Technology, PCCOER Ravet.
+        <strong>SPARK QUEST | BYTE LOGIC</strong> • Technospark Club
       </div>
       <div style="display: flex; align-items: center; gap: 0.5rem;">
         <span style="font-size: 0.7rem;">Brand Theme:</span>
@@ -436,4 +457,5 @@
   <script src="js/app.js"></script>
 
 </body>
+
 </html>
