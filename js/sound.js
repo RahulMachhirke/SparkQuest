@@ -1,5 +1,6 @@
 /**
  * Web Audio API synthesizer for 100% offline, zero-dependency sound effects.
+ * No external .mp3 files required.
  */
 class SoundEngine {
   constructor() {

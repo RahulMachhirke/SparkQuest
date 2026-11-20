@@ -1,6 +1,6 @@
 /**
  * Kahoot-Style Quiz Engine for Round 1: Rapid Fire
- * Supports both Single-Correct and Multiple-Select Question Formats
+ * Handles single-correct & multi-select questions, speed scoring, and auto-sync to Firebase.
  */
 const Quiz = {
   questions: [],
@@ -23,14 +23,14 @@ const Quiz = {
 
   start() {
     if (!Auth.currentTeam && Auth.currentRole !== 'admin') {
-      alert('Please log in with your Team ID before starting the competition round.');
+      alert('Please sign in with your Team ID to begin Round 1.');
       App.openLoginModal();
       return;
     }
 
     this.init();
     if (this.questions.length === 0) {
-      alert('No questions loaded. Please check js/questions.js.');
+      alert('No questions loaded in js/questions.js.');
       return;
     }
 
@@ -59,14 +59,12 @@ const Quiz = {
     this.selectedIndices.clear();
 
     const q = this.questions[index];
-    this.secondsLeft = q.timeLimitSec || SPARK_CONFIG.quizDefaults.timeLimitPerQuestionSec;
+    this.secondsLeft = q.timeLimitSec || 20;
 
-    // Update Header counters
     document.getElementById('quiz-q-num').textContent = `${index + 1} / ${this.questions.length}`;
-    document.getElementById('quiz-category').textContent = q.category || 'General Computing';
+    document.getElementById('quiz-category').textContent = q.category || 'Technical Concepts';
     document.getElementById('quiz-current-score').textContent = this.score.toLocaleString();
 
-    // Streak Pill
     const streakEl = document.getElementById('quiz-streak-pill');
     if (this.streak > 1) {
       streakEl.style.display = 'inline-flex';
@@ -75,7 +73,6 @@ const Quiz = {
       streakEl.style.display = 'none';
     }
 
-    // Question Format Badge
     const formatBadge = document.getElementById('quiz-format-badge');
     if (q.type === 'multiple') {
       formatBadge.innerHTML = `<span class="badge-multi">☑️ Multiple Select (Choose ALL that apply)</span>`;
@@ -83,7 +80,6 @@ const Quiz = {
       formatBadge.innerHTML = `<span class="badge-single">🔘 Single Choice (One correct answer)</span>`;
     }
 
-    // Question Text & Optional Code Snippet
     document.getElementById('quiz-question-text').textContent = q.question;
     const codeBox = document.getElementById('quiz-code-box');
     if (q.code && q.code.trim()) {
@@ -93,7 +89,6 @@ const Quiz = {
       codeBox.style.display = 'none';
     }
 
-    // Render Answer Option Buttons (Kahoot 4-card grid)
     const optionsGrid = document.getElementById('quiz-options-grid');
     const kahootSymbols = ['▲', '◆', '●', '■'];
     const cardThemes = ['theme-orange', 'theme-teal', 'theme-yellow', 'theme-sky'];
@@ -111,7 +106,6 @@ const Quiz = {
       </button>
     `).join('');
 
-    // Multi-Select Submit Button
     const multiSubmitBtn = document.getElementById('quiz-multi-submit-btn');
     if (q.type === 'multiple') {
       multiSubmitBtn.style.display = 'inline-flex';
@@ -120,10 +114,7 @@ const Quiz = {
       multiSubmitBtn.style.display = 'none';
     }
 
-    // Hide feedback bar
     document.getElementById('quiz-feedback-bar').style.display = 'none';
-
-    // Start Timer Countdown
     this.startTimer(this.secondsLeft);
   },
 
@@ -156,16 +147,13 @@ const Quiz = {
 
   handleOptionClick(index) {
     if (this.hasAnswered) return;
-
     const q = this.questions[this.currentIndex];
 
     if (q.type === 'single') {
-      // Single Choice: Lock selection immediately and evaluate
       this.selectedIndices.clear();
       this.selectedIndices.add(index);
       this.evaluateAnswer();
     } else {
-      // Multiple Choice: Toggle checkbox selection
       const btn = document.getElementById(`opt-btn-${index}`);
       if (this.selectedIndices.has(index)) {
         this.selectedIndices.delete(index);
@@ -200,17 +188,14 @@ const Quiz = {
     const correctSet = new Set(q.correct);
     const selected = Array.from(this.selectedIndices);
 
-    // Verify if selected set exactly matches correct set
     const isCorrect = selected.length === correctSet.size &&
                       selected.every(idx => correctSet.has(idx));
 
     let pointsAwarded = 0;
 
     if (isCorrect) {
-      // Kahoot speed formula: faster answers award up to basePoints
       const totalSec = q.timeLimitSec || 20;
       const speedRatio = Math.max(0.1, this.secondsLeft / totalSec);
-      const base = SPARK_CONFIG.quizDefaults.basePoints;
       const speedPoints = Math.round(500 + 500 * speedRatio);
       const streakBonus = this.streak * 50;
       pointsAwarded = speedPoints + streakBonus;
@@ -220,14 +205,9 @@ const Quiz = {
       sounds.correct();
       this.revealAnswers(true, pointsAwarded, q.explanation);
     } else {
-      // Negative marking penalty if enabled
-      if (SPARK_CONFIG.quizDefaults.negativeMarkingEnabled) {
-        pointsAwarded = -SPARK_CONFIG.quizDefaults.negativePoints;
-        this.score = Math.max(0, this.score + pointsAwarded);
-      }
       this.streak = 0;
       sounds.wrong();
-      this.revealAnswers(false, pointsAwarded, q.explanation);
+      this.revealAnswers(false, 0, q.explanation);
     }
 
     this.answersRecord.push({
@@ -261,7 +241,6 @@ const Quiz = {
     const submitBtn = document.getElementById('quiz-multi-submit-btn');
     if (submitBtn) submitBtn.style.display = 'none';
 
-    // Show Feedback Bar
     const feedbackBar = document.getElementById('quiz-feedback-bar');
     const feedbackTitle = document.getElementById('feedback-title');
     const feedbackPoints = document.getElementById('feedback-points');
@@ -275,7 +254,7 @@ const Quiz = {
     } else {
       feedbackBar.className = 'feedback-bar feedback-wrong';
       feedbackTitle.textContent = this.selectedIndices.size === 0 ? '⏰ Time Out!' : '❌ Incorrect!';
-      feedbackPoints.textContent = points < 0 ? `${points} pts (Penalty)` : '+0 pts';
+      feedbackPoints.textContent = '+0 pts';
     }
 
     feedbackExplanation.textContent = explanation || '';
@@ -301,7 +280,7 @@ const Quiz = {
     document.getElementById('result-accuracy').textContent = `${accuracy}% (${correctCount}/${this.questions.length})`;
     document.getElementById('result-time').textContent = `${this.totalTimeTakenSec} seconds`;
 
-    // AUTOMATIC INSERTION TO LEADERBOARD:
+    // AUTO-RECORD TO LEADERBOARD & FIREBASE:
     if (Auth.currentTeam) {
       Leaderboard.recordQuizScore(Auth.currentTeam.id, this.score, this.totalTimeTakenSec);
     }

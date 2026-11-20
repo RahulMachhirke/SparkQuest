@@ -1,6 +1,6 @@
 /**
- * Default enrolled teams for Spark Quest | Byte Logic
- * Teams will also be able to sign in using their Team ID & Passcode.
+ * Default enrolled college teams
+ * Participants use their Team ID & Passcode to sign in on their devices.
  */
 const DEFAULT_TEAMS = [
   {
@@ -47,7 +47,7 @@ const DEFAULT_TEAMS = [
     name: "Syntax Strikers",
     passcode: "team04",
     college: "COEP Tech",
-    members: "Yash Bhosale, Sujal Sharma, Harsh Vardhan",
+    members: "Yash Bhosale, Sayali Mane, Harsh Vardhan",
     avatar: "⚔️",
     round1Score: 0,
     manualAdjustment: 0,

@@ -1,8 +1,18 @@
 /**
- * Live Leaderboard Engine: Supports Automatic & Manual Insertion
+ * Live Leaderboard Engine: Supports Real-Time Firebase Sync & Local Fallback
+ * Admin insertion features are strictly protected and visible ONLY to admins.
  */
 const Leaderboard = {
-  getTeams() {
+  teamsCache: [],
+  firestoreUnsubscribe: null,
+
+  init() {
+    this.teamsCache = this.getLocalTeams();
+    this.setupFirestoreListener();
+    this.render();
+  },
+
+  getLocalTeams() {
     const raw = localStorage.getItem('spark_leaderboard_teams');
     if (raw) {
       try {
@@ -11,92 +21,144 @@ const Leaderboard = {
         return DEFAULT_TEAMS;
       }
     }
-    // Initialize with default teams if fresh
-    this.saveTeams(DEFAULT_TEAMS);
+    this.saveLocalTeams(DEFAULT_TEAMS);
     return DEFAULT_TEAMS;
   },
 
-  saveTeams(teams) {
+  saveLocalTeams(teams) {
+    this.teamsCache = teams;
     localStorage.setItem('spark_leaderboard_teams', JSON.stringify(teams));
+  },
+
+  getTeams() {
+    return this.teamsCache;
+  },
+
+  setupFirestoreListener() {
+    if (typeof db !== 'undefined' && db) {
+      try {
+        if (this.firestoreUnsubscribe) this.firestoreUnsubscribe();
+        
+        this.firestoreUnsubscribe = db.collection('teams').onSnapshot((snapshot) => {
+          if (!snapshot.empty) {
+            const remoteTeams = [];
+            snapshot.forEach(doc => {
+              remoteTeams.push({ id: doc.id, ...doc.data() });
+            });
+            this.saveLocalTeams(remoteTeams);
+            this.render();
+          } else {
+            // Seed Firestore with default teams on first run
+            DEFAULT_TEAMS.forEach(team => {
+              db.collection('teams').doc(team.id).set(team);
+            });
+          }
+        }, (err) => {
+          console.warn("Firestore listener fallback to local mode:", err);
+        });
+      } catch (e) {
+        console.warn("Firestore error, running locally:", e);
+      }
+    }
   },
 
   /**
    * AUTOMATIC INSERTION:
-   * Called immediately upon completion of the Round 1 Rapid Fire quiz.
+   * Called when a team finishes the Round 1 quiz on their phone or laptop.
    */
-  recordQuizScore(teamId, quizPoints, timeTakenSec) {
+  async recordQuizScore(teamId, quizPoints, timeTakenSec) {
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    // 1. Update in Firestore if connected (syncs to everyone!)
+    if (typeof db !== 'undefined' && db && isFirebaseReady) {
+      try {
+        const teamRef = db.collection('teams').doc(teamId);
+        const doc = await teamRef.get();
+        const currentData = doc.exists ? doc.data() : {};
+        const manual = currentData.manualAdjustment || 0;
+        const total = quizPoints + manual;
+
+        await teamRef.set({
+          ...currentData,
+          round1Score: quizPoints,
+          totalScore: total,
+          timeTakenSec: timeTakenSec,
+          completedAt: nowTime
+        }, { merge: true });
+      } catch (e) {
+        console.warn("Error saving to Firestore:", e);
+      }
+    }
+
+    // 2. Local fallback update
     const teams = this.getTeams();
     const updated = teams.map(t => {
       if (t.id === teamId) {
-        const round1 = quizPoints;
-        const total = round1 + (t.manualAdjustment || 0);
         return {
           ...t,
-          round1Score: round1,
-          totalScore: total,
+          round1Score: quizPoints,
+          totalScore: quizPoints + (t.manualAdjustment || 0),
           timeTakenSec: timeTakenSec,
-          completedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+          completedAt: nowTime
         };
       }
       return t;
     });
 
-    this.saveTeams(updated);
+    this.saveLocalTeams(updated);
     this.render();
-    this.logActivity(`${Auth.currentTeam?.name || teamId} completed Round 1 with ${quizPoints} pts (Auto)`);
   },
 
   /**
-   * MANUAL INSERTION / ADJUSTMENT:
-   * Called when an organizer/judge manually enters or adjusts scores for a team.
+   * MANUAL INSERTION (Admin-Only):
+   * Organizers adjust scores or add bonuses/penalties with an audit note.
    */
-  manualAdjustScore(teamId, newManualPoints, note = '') {
-    const teams = this.getTeams();
-    let teamName = '';
+  async manualAdjustScore(teamId, adjustmentPoints, note = '') {
+    if (Auth.currentRole !== 'admin') {
+      alert("Unauthorized: Only organizers can adjust scores.");
+      return;
+    }
 
+    const manual = Number(adjustmentPoints) || 0;
+
+    // 1. Update in Firestore if connected
+    if (typeof db !== 'undefined' && db && isFirebaseReady) {
+      try {
+        const teamRef = db.collection('teams').doc(teamId);
+        const doc = await teamRef.get();
+        const currentData = doc.exists ? doc.data() : {};
+        const r1 = currentData.round1Score || 0;
+        const total = r1 + manual;
+
+        await teamRef.set({
+          ...currentData,
+          manualAdjustment: manual,
+          totalScore: total,
+          adjustmentNote: note || 'Judge Manual Entry',
+          lastUpdated: new Date().toLocaleTimeString()
+        }, { merge: true });
+      } catch (e) {
+        console.warn("Error saving to Firestore:", e);
+      }
+    }
+
+    // 2. Local fallback update
+    const teams = this.getTeams();
     const updated = teams.map(t => {
       if (t.id === teamId) {
-        teamName = t.name;
-        const manual = Number(newManualPoints) || 0;
-        const total = (t.round1Score || 0) + manual;
         return {
           ...t,
           manualAdjustment: manual,
-          totalScore: total,
+          totalScore: (t.round1Score || 0) + manual,
+          adjustmentNote: note,
           lastUpdated: new Date().toLocaleTimeString()
         };
       }
       return t;
     });
 
-    this.saveTeams(updated);
+    this.saveLocalTeams(updated);
     this.render();
-    this.logActivity(`Manual score adjusted for ${teamName}: ${newManualPoints >= 0 ? '+' : ''}${newManualPoints} pts (${note || 'Manual Entry'})`);
-  },
-
-  logActivity(message) {
-    const feed = JSON.parse(localStorage.getItem('spark_activity_log') || '[]');
-    feed.unshift({
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      text: message
-    });
-    localStorage.setItem('spark_activity_log', JSON.stringify(feed.slice(0, 10)));
-    this.renderActivityLog();
-  },
-
-  renderActivityLog() {
-    const container = document.getElementById('activity-ticker-content');
-    if (!container) return;
-    const feed = JSON.parse(localStorage.getItem('spark_activity_log') || '[]');
-    if (feed.length === 0) {
-      container.innerHTML = `<span class="activity-empty">Awaiting Round 1 quiz submissions...</span>`;
-      return;
-    }
-    container.innerHTML = feed.slice(0, 5).map(f => `
-      <span class="activity-item">
-        <span class="activity-time">[${f.time}]</span> ${f.text}
-      </span>
-    `).join(' • ');
   },
 
   render() {
@@ -106,16 +168,15 @@ const Leaderboard = {
     const searchTerm = (document.getElementById('leaderboard-search')?.value || '').toLowerCase();
     const filterCollege = document.getElementById('leaderboard-filter')?.value || 'all';
 
-    let teams = this.getTeams();
+    let teams = [...this.getTeams()];
 
-    // Tie-breaking sorting logic:
+    // Tie-Breaking Ranking Sort:
     // 1. Highest totalScore
-    // 2. If tied, lowest timeTakenSec (fastest completion)
+    // 2. If equal totalScore, lowest timeTakenSec (fastest completion)
     teams.sort((a, b) => {
       if (b.totalScore !== a.totalScore) {
         return b.totalScore - a.totalScore;
       }
-      // Tie-breaker: if both have finished, lower time wins
       const timeA = a.timeTakenSec || 999999;
       const timeB = b.timeTakenSec || 999999;
       return timeA - timeB;
@@ -133,14 +194,16 @@ const Leaderboard = {
     });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No matching teams found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 2rem;">No matching teams found.</td></tr>`;
       return;
     }
+
+    const isAdmin = Auth.currentRole === 'admin';
 
     tbody.innerHTML = filtered.map((t, idx) => {
       const rank = idx + 1;
       let rankBadge = `<span class="rank-num">#${rank}</span>`;
-      if (rank === 1) rankBadge = `<span class="medal gold" title="1st Place">🥇 1</span>`;
+      if (rank === 1) rankBadge = `<span class="medal gold" title="1st Place Champion">🥇 1</span>`;
       else if (rank === 2) rankBadge = `<span class="medal silver" title="2nd Place">🥈 2</span>`;
       else if (rank === 3) rankBadge = `<span class="medal bronze" title="3rd Place">🥉 3</span>`;
 
@@ -148,8 +211,8 @@ const Leaderboard = {
 
       return `
         <tr class="${rank <= 3 ? 'top-rank-row rank-' + rank : ''}">
-          <td class="col-rank">${rankBadge}</td>
-          <td class="col-team">
+          <td style="text-align: center; width: 65px;">${rankBadge}</td>
+          <td>
             <div class="team-meta">
               <span class="team-avatar">${t.avatar || '⚡'}</span>
               <div>
@@ -161,25 +224,26 @@ const Leaderboard = {
               </div>
             </div>
           </td>
-          <td class="col-r1 numeric-col">
-            <span class="score-r1">${t.round1Score.toLocaleString()}</span>
-            <span class="score-subtext">Auto</span>
+          <td class="numeric-col">
+            <span class="score-r1">${(t.round1Score || 0).toLocaleString()}</span>
+            <span class="score-subtext">Quiz (Auto)</span>
           </td>
-          <td class="col-manual numeric-col">
+          <td class="numeric-col">
             <span class="score-manual ${t.manualAdjustment > 0 ? 'pos' : t.manualAdjustment < 0 ? 'neg' : ''}">
-              ${t.manualAdjustment > 0 ? '+' : ''}${t.manualAdjustment}
+              ${t.manualAdjustment > 0 ? '+' : ''}${t.manualAdjustment || 0}
             </span>
-            <span class="score-subtext">Judge Entry</span>
+            <span class="score-subtext">Judge Adjustment</span>
           </td>
-          <td class="col-tie numeric-col">
+          <td class="numeric-col">
             <span class="tiebreak-time">${tieBreakInfo}</span>
             <span class="score-subtext">${t.completedAt || 'Pending'}</span>
           </td>
-          <td class="col-total numeric-col">
-            <strong class="score-total">${t.totalScore.toLocaleString()}</strong>
-            <span class="score-subtext">pts</span>
+          <td class="numeric-col">
+            <strong class="score-total">${(t.totalScore || 0).toLocaleString()}</strong>
+            <span class="score-subtext">points</span>
           </td>
-          <td class="col-actions">
+          <!-- Strictly Admin-Only Action Cell -->
+          <td class="admin-only" style="text-align: center;">
             <button class="btn btn-sm btn-outline-teal" onclick="Leaderboard.openManualModal('${t.id}')">
               ✏️ Adjust
             </button>
@@ -187,11 +251,13 @@ const Leaderboard = {
         </tr>
       `;
     }).join('');
-
-    this.renderActivityLog();
   },
 
   openManualModal(teamId) {
+    if (Auth.currentRole !== 'admin') {
+      alert("Restricted: Admin access required.");
+      return;
+    }
     const teams = this.getTeams();
     const team = teams.find(t => t.id === teamId);
     if (!team) return;
@@ -199,9 +265,9 @@ const Leaderboard = {
     document.getElementById('manual-modal-team-id').value = team.id;
     document.getElementById('manual-modal-team-name').textContent = team.name;
     document.getElementById('manual-modal-college').textContent = team.college;
-    document.getElementById('manual-modal-r1-score').textContent = `${team.round1Score} pts (Quiz)`;
+    document.getElementById('manual-modal-r1-score').textContent = `${team.round1Score || 0} pts (Quiz)`;
     document.getElementById('manual-modal-points').value = team.manualAdjustment || 0;
-    document.getElementById('manual-modal-reason').value = '';
+    document.getElementById('manual-modal-reason').value = team.adjustmentNote || '';
 
     document.getElementById('manual-score-modal').style.display = 'flex';
   },
@@ -222,26 +288,26 @@ const Leaderboard = {
   },
 
   exportCSV() {
-    const teams = this.getTeams();
+    const teams = [...this.getTeams()];
     teams.sort((a, b) => b.totalScore - a.totalScore);
 
-    const headers = ['Rank', 'Team ID', 'Team Name', 'College', 'Round 1 Quiz (Auto)', 'Manual Adjustment', 'Tie-Breaker Time (s)', 'Total Score'];
+    const headers = ['Rank', 'Team ID', 'Team Name', 'College', 'Round 1 Quiz', 'Manual Adjustment', 'Tie-Breaker Time (s)', 'Total Score'];
     const rows = teams.map((t, i) => [
       i + 1,
       t.id,
       `"${t.name}"`,
       `"${t.college}"`,
-      t.round1Score,
-      t.manualAdjustment,
+      t.round1Score || 0,
+      t.manualAdjustment || 0,
       t.timeTakenSec || 0,
-      t.totalScore
+      t.totalScore || 0
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `SparkQuest_Round1_Leaderboard_${Date.now()}.csv`);
+    link.setAttribute('download', `SparkQuest_Leaderboard_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

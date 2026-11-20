@@ -2,96 +2,75 @@
 ### Department of Information Technology — PCCOER Ravet
 **Organised by Technospark Club**
 
-A streamlined, pure **HTML + CSS + JavaScript** technical competition platform focused on:
-1. **Authentication (Team & Admin)**
-2. **Live Leaderboard with Automatic & Manual Insertion**
-3. **Round 1: Rapid Fire (Kahoot-style Quiz Engine)**
+A modern, responsive, zero-build **HTML + CSS + JavaScript** technical competition platform featuring:
+1. **Role-Based Authentication** (Admin features strictly isolated and hidden from participants)
+2. **Round 1: Rapid Fire (Kahoot-Style Quiz)** with single-choice & multi-select questions
+3. **Live Dynamic Leaderboard** with real-time automatic sync + judge manual adjustments
+4. **Official Theme Palette**: `#8ECAE6`, `#219EBC`, `#023047`, `#FFB703`, `#FB8500`
 
 ---
 
-## 🎨 Official Color Palette
-The website strictly uses the provided **"Refreshing Summer"** palette:
-- **Light Sky Blue**: `#8ECAE6`
-- **Ocean Teal Blue**: `#219EBC`
-- **Prussian Navy**: `#023047`
-- **Honey Amber / Yellow**: `#FFB703`
-- **High-Energy Orange**: `#FB8500`
-- **Deep Midnight Background**: `#011826`
+## 🚀 How to Run Locally
+
+Because this is a pure, zero-build web app:
+- **Option 1**: Simply double-click `index.html` to open in any web browser.
+- **Option 2 (Recommended for local lab network)**:
+  ```bash
+  python -m http.server 8000
+  ```
+  Visit `http://localhost:8000` (or `http://<your-ip>:8000` on your campus LAN).
 
 ---
 
-## 🚀 How to Run the Website
+## ☁️ How to Connect Firebase (Optional for Multi-Device Real-Time Sync)
 
-There are **zero build steps, zero Node.js installations, and zero Tailwind compilation dependencies**!
+The website works immediately out-of-the-box in local mode! When you want scores to sync in real time across 15 different participant laptops to the main projector:
 
-### Option 1: Direct in Browser
-Simply double-click `index.html` or open it directly in Google Chrome, Edge, or Firefox.
-
-### Option 2: Using Python (Recommended for local hosting / LAN)
-```bash
-python -m http.server 8000
-```
-Then visit `http://localhost:8000` or `http://<your-ip>:8000` on the lab network.
+1. Go to [console.firebase.google.com](https://console.firebase.google.com) (free).
+2. Create a project and add a **Web App** (`</>`).
+3. Under **Firestore Database**, click **Create database** (start in Test Mode).
+4. Copy your `firebaseConfig` keys into `js/firebase-config.js`:
+   ```javascript
+   const FIREBASE_CONFIG = {
+     apiKey: "AIzaSy...",
+     authDomain: "spark-quest.firebaseapp.com",
+     projectId: "spark-quest",
+     ...
+   };
+   ```
+5. Done! Scores and manual adjustments will instantly sync across all screens in real time.
 
 ---
 
-## 📝 How Developers Insert Questions
+## 📝 How Developers Add Questions
 
 Open: [`js/questions.js`](file:///c:/Users/rahul/OneDrive/Desktop/Technospark-Anvaya/js/questions.js)
 
 The file contains clean templates for both **Single-Correct MCQs** and **Multiple-Select Questions**:
 
-### 1. Single-Correct MCQ Example
 ```javascript
+// Single-Choice Question
 {
   id: "q-04",
   type: "single",
-  category: "Data Structures",
+  category: "Programming Fundamentals",
   question: "What is the worst-case time complexity of QuickSort?",
-  options: [
-    "O(N log N)",
-    "O(N)",
-    "O(N²)",
-    "O(log N)"
-  ],
+  options: ["O(N log N)", "O(N)", "O(N²)", "O(log N)"],
   correct: [2], // 0-based index: 0=A, 1=B, 2=C, 3=D
-  explanation: "When partitions are repeatedly unbalanced, QuickSort degrades to O(N²).",
   timeLimitSec: 20
 }
-```
 
-### 2. Multiple-Select Question Example ("Select all that apply")
-```javascript
+// Multiple-Select Question ("Select all that apply")
 {
   id: "q-05",
   type: "multiple",
-  category: "Operating Systems",
-  question: "Which of the following are valid process scheduling algorithms? (Select ALL that apply)",
-  options: [
-    "Round Robin (RR)",
-    "First-Come, First-Served (FCFS)",
-    "Shortest Job First (SJF)",
-    "Dijkstra Shortest Path"
-  ],
-  correct: [0, 1, 2], // Options A, B, and C are correct
-  explanation: "RR, FCFS, and SJF are CPU schedulers; Dijkstra is a graph shortest path algorithm.",
+  category: "Data Structures",
+  question: "Which of the following are linear data structures? (Select all that apply)",
+  options: ["Array", "Graph", "Stack", "Tree"],
+  correct: [0, 2], // Options A (0) and C (2)
   timeLimitSec: 25
 }
 ```
-
----
-
-## 📊 Live Leaderboard Functionality
-
-### 1. Automatic Insertion:
-- When a team completes the Round 1 quiz, their score is calculated based on accuracy and speed.
-- Their score, completion timestamp, and overall time taken (in seconds) are automatically saved to the leaderboard.
-- **Tie-Breaking Rule**: If two teams tie on total score, the team with the lower total completion time ranks higher.
-
-### 2. Manual Insertion / Adjustment:
-- Faculty and judges can click the **✏️ Adjust** button on any team row.
-- A modal opens allowing you to input positive points (`+100` bonus/judge marks) or negative points (`-25` penalty).
-- The total score updates dynamically in real-time.
 
 ---
 
@@ -106,20 +85,13 @@ The file contains clean templates for both **Single-Correct MCQs** and **Multipl
 
 ---
 
-## 📁 File Structure
+## 🚢 Deploying to Vercel
+
+Because there are **no package.json or conflicting build files**, Vercel will deploy this statically in 5 seconds with zero build errors:
+
+```bash
+git add .
+git commit -m "Clean competition frontend with live leaderboard and Kahoot quiz"
+git push origin main
 ```
-Technospark-Anvaya/
-├── index.html          <-- Semantic HTML structure
-├── css/
-│   └── style.css       <-- Pure CSS with CSS Custom Properties & Palette
-├── js/
-│   ├── config.js       <-- Competition metadata & scoring defaults
-│   ├── sound.js        <-- Offline Web Audio API sound synthesizer
-│   ├── questions.js    <-- Questions repository (Developers insert questions here)
-│   ├── teams.js        <-- Enrolled teams list
-│   ├── auth.js         <-- Team & Admin authentication
-│   ├── leaderboard.js  <-- Live leaderboard (auto & manual score handling)
-│   ├── quiz.js         <-- Kahoot quiz engine (single & multi-select, timer)
-│   └── app.js          <-- Main router and event binder
-└── README.md           <-- Documentation
-```
+Import the repository on [vercel.com/new](https://vercel.com/new) and hit **Deploy**!

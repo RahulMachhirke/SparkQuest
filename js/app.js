@@ -5,9 +5,10 @@ const App = {
   currentTab: 'overview',
 
   init() {
+    initFirebase();
     Auth.init();
     Quiz.init();
-    Leaderboard.render();
+    Leaderboard.init();
     this.bindEvents();
     this.switchTab('overview');
   },
@@ -15,7 +16,6 @@ const App = {
   switchTab(tabId) {
     this.currentTab = tabId;
 
-    // Update active nav links
     document.querySelectorAll('.nav-link').forEach(link => {
       if (link.dataset.tab === tabId) {
         link.classList.add('active');
@@ -24,7 +24,6 @@ const App = {
       }
     });
 
-    // Hide all tab views and show the selected one
     document.querySelectorAll('.tab-view').forEach(view => {
       view.style.display = 'none';
     });
@@ -40,7 +39,6 @@ const App = {
   },
 
   bindEvents() {
-    // Navigation tabs
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', (e) => {
         const tab = e.currentTarget.dataset.tab;
@@ -48,7 +46,6 @@ const App = {
       });
     });
 
-    // Leaderboard search & filter
     const searchInput = document.getElementById('leaderboard-search');
     if (searchInput) {
       searchInput.addEventListener('input', () => Leaderboard.render());
@@ -59,7 +56,6 @@ const App = {
       filterSelect.addEventListener('change', () => Leaderboard.render());
     }
 
-    // Modal background clicks
     window.addEventListener('click', (e) => {
       const loginModal = document.getElementById('login-modal');
       const manualModal = document.getElementById('manual-score-modal');
@@ -86,7 +82,7 @@ const App = {
     if (!select) return;
     const teams = Leaderboard.getTeams();
     select.innerHTML = '<option value="">-- Choose Team to Test --</option>' +
-      teams.map(t => `<option value="${t.id}">${t.avatar} ${t.name} (${t.college})</option>`).join('');
+      teams.map(t => `<option value="${t.id}">${t.avatar || '⚡'} ${t.name} (${t.college})</option>`).join('');
   },
 
   handleQuickTeamLogin(teamId) {
@@ -97,8 +93,10 @@ const App = {
       Auth.currentRole = 'team';
       Auth.currentTeam = match;
       Auth.saveSession();
+      Auth.applyRoleVisibility();
       Auth.renderHeaderUser();
       this.closeLoginModal();
+      Leaderboard.render();
       sounds.correct();
     }
   },
@@ -117,6 +115,7 @@ const App = {
       setTimeout(() => {
         msgEl.textContent = '';
         this.closeLoginModal();
+        Leaderboard.render();
       }, 700);
     } else {
       sounds.wrong();
@@ -138,6 +137,7 @@ const App = {
       setTimeout(() => {
         msgEl.textContent = '';
         this.closeLoginModal();
+        Leaderboard.render();
       }, 700);
     } else {
       sounds.wrong();
@@ -147,7 +147,6 @@ const App = {
   }
 };
 
-// Bootstrap when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 });

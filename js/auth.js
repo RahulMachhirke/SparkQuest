@@ -1,8 +1,11 @@
 /**
- * Authentication & Session Management
+ * Authentication & Role Visibility Gatekeeper
+ * Ensures Admin features are strictly hidden from participants.
  */
+const ADMIN_SECURITY_KEY = "sparkadmin2026";
+
 const Auth = {
-  currentRole: 'guest',
+  currentRole: 'guest', // 'guest' | 'team' | 'admin'
   currentTeam: null,
 
   init() {
@@ -18,14 +21,23 @@ const Auth = {
       }
     }
 
-    // Default to Team 01 for smooth initial developer testing if nothing is logged in
+    // Default to Team 01 for smooth testing if empty
     if (!this.currentTeam && typeof DEFAULT_TEAMS !== 'undefined' && DEFAULT_TEAMS.length > 0) {
       this.currentTeam = DEFAULT_TEAMS[0];
       this.currentRole = 'team';
       this.saveSession();
     }
 
+    this.applyRoleVisibility();
     this.renderHeaderUser();
+  },
+
+  applyRoleVisibility() {
+    if (this.currentRole === 'admin') {
+      document.body.classList.add('is-admin');
+    } else {
+      document.body.classList.remove('is-admin');
+    }
   },
 
   loginTeam(teamId, passcode) {
@@ -38,6 +50,7 @@ const Auth = {
       this.currentRole = 'team';
       this.currentTeam = match;
       this.saveSession();
+      this.applyRoleVisibility();
       this.renderHeaderUser();
       return { success: true, message: `Welcome, ${match.name}!` };
     }
@@ -45,11 +58,12 @@ const Auth = {
   },
 
   loginAdmin(key) {
-    if (key.trim() === SPARK_CONFIG.adminKey || key.trim() === 'admin') {
+    if (key.trim() === ADMIN_SECURITY_KEY || key.trim() === 'admin') {
       this.currentRole = 'admin';
       this.saveSession();
+      this.applyRoleVisibility();
       this.renderHeaderUser();
-      return { success: true, message: 'Admin authenticated successfully.' };
+      return { success: true, message: 'Admin verified. Score adjustments unlocked!' };
     }
     return { success: false, message: 'Incorrect Admin Key.' };
   },
@@ -59,7 +73,9 @@ const Auth = {
     this.currentTeam = null;
     localStorage.removeItem('spark_auth_role');
     localStorage.removeItem('spark_auth_team');
+    this.applyRoleVisibility();
     this.renderHeaderUser();
+    Leaderboard.render();
   },
 
   saveSession() {
@@ -75,10 +91,21 @@ const Auth = {
     const userBadgeEl = document.getElementById('user-profile-badge');
     if (!userBadgeEl) return;
 
-    if (this.currentRole === 'team' && this.currentTeam) {
+    if (this.currentRole === 'admin') {
       userBadgeEl.innerHTML = `
-        <div class="user-pill team-pill" onclick="App.openLoginModal()">
-          <span class="user-avatar">${this.currentTeam.avatar}</span>
+        <div class="user-pill admin-active-pill" title="Admin Mode Active">
+          <span class="user-avatar">🛡️</span>
+          <div class="user-info">
+            <span class="user-name">Organizer Admin</span>
+            <span class="user-role">Score Controls Active</span>
+          </div>
+          <button class="logout-btn" title="Sign Out Admin" onclick="Auth.logout();">✕</button>
+        </div>
+      `;
+    } else if (this.currentRole === 'team' && this.currentTeam) {
+      userBadgeEl.innerHTML = `
+        <div class="user-pill" onclick="App.openLoginModal()">
+          <span class="user-avatar">${this.currentTeam.avatar || '⚡'}</span>
           <div class="user-info">
             <span class="user-name">${this.currentTeam.name}</span>
             <span class="user-role">${this.currentTeam.college}</span>
@@ -86,21 +113,10 @@ const Auth = {
           <button class="logout-btn" title="Sign Out" onclick="event.stopPropagation(); Auth.logout();">✕</button>
         </div>
       `;
-    } else if (this.currentRole === 'admin') {
-      userBadgeEl.innerHTML = `
-        <div class="user-pill admin-pill">
-          <span class="user-avatar">🛡️</span>
-          <div class="user-info">
-            <span class="user-name">Organizer Admin</span>
-            <span class="user-role">Full Access</span>
-          </div>
-          <button class="logout-btn" title="Sign Out" onclick="Auth.logout();">✕</button>
-        </div>
-      `;
     } else {
       userBadgeEl.innerHTML = `
         <button class="btn btn-outline" onclick="App.openLoginModal()">
-          <span>🔑 Team / Admin Login</span>
+          <span>🔑 Sign In</span>
         </button>
       `;
     }
