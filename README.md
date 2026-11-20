@@ -1,5 +1,5 @@
 # SPARK QUEST | BYTE LOGIC ⚡
-### Department of Information Technology — PCCOER Ravet
+### Department of Information Technology
 **Organised by Technospark Club**
 
 A modern, responsive, zero-build **HTML + CSS + JavaScript** technical competition platform featuring:
