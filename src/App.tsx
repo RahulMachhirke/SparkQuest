@@ -46,16 +46,21 @@ export const App: React.FC = () => {
   } = useCompetitionStore();
 
   // Route state: 'participant' vs 'admin'
-  const [route, setRoute] = useState<'participant' | 'admin'>(() => {
-    if (typeof window !== 'undefined') {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      if (path.includes('/admin') || hash.includes('admin')) {
-        return 'admin';
-      }
-    }
-    return 'participant';
-  });
+  // Admin is accessible via: /admin, /#/admin, /?admin, #admin
+  const isAdminRoute = () => {
+    if (typeof window === 'undefined') return false;
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    const search = window.location.search.toLowerCase();
+    return (
+      path === '/admin' ||
+      path.startsWith('/admin/') ||
+      hash.includes('admin') ||
+      search.includes('admin')
+    );
+  };
+
+  const [route, setRoute] = useState<'participant' | 'admin'>(() => isAdminRoute());
 
   // Admin authentication state
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
@@ -68,16 +73,10 @@ export const App: React.FC = () => {
   // Participant view state: 'arena' | 'leaderboard' | 'round2'
   const [participantView, setParticipantView] = useState<'arena' | 'leaderboard' | 'round2'>('arena');
 
-  // Handle URL hash changes
+  // Handle URL changes (hash or popstate)
   useEffect(() => {
     const handleLocationChange = () => {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      if (path.includes('/admin') || hash.includes('admin')) {
-        setRoute('admin');
-      } else {
-        setRoute('participant');
-      }
+      setRoute(isAdminRoute() ? 'admin' : 'participant');
     };
 
     window.addEventListener('hashchange', handleLocationChange);
