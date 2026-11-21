@@ -172,7 +172,7 @@ export const App: React.FC = () => {
           </div>
 
           {/* Nav Links for logged in team */}
-          {currentTeam ? (
+          {currentTeam && (
             <div className="flex items-center gap-2 sm:gap-3">
               <nav className="flex items-center gap-1 bg-[#023047] p-1 rounded-xl border border-[#219EBC]/30">
                 <button
@@ -220,14 +220,6 @@ export const App: React.FC = () => {
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
-          ) : (
-            <button
-              onClick={navigateToAdmin}
-              className="text-xs font-mono text-slate-400 hover:text-[#8ECAE6] flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Admin Access</span>
-            </button>
           )}
         </div>
       </header>
@@ -304,14 +296,8 @@ export const App: React.FC = () => {
         <div>
           Technospark 2026 • Dept of Information Technology, PCCOER Ravet
         </div>
-        <div className="flex items-center gap-4 text-[11px]">
+        <div className="flex items-center gap-4 text-[11px] text-slate-500">
           <span>Single Session Real-time Engine</span>
-          <button
-            onClick={navigateToAdmin}
-            className="text-slate-500 hover:text-[#8ECAE6] transition-colors cursor-pointer"
-          >
-            Organizer Portal
-          </button>
         </div>
       </footer>
     </div>
