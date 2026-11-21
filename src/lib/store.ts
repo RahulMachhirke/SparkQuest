@@ -264,6 +264,32 @@ export function useCompetitionStore() {
     updateTeams(updated);
   };
 
+  // Team CRUD operations
+  const addTeam = (teamData: Omit<Team, 'round1Score' | 'manualAdjustment' | 'totalScore' | 'timeTakenSec' | 'completedAt'>) => {
+    const newTeam: Team = {
+      ...teamData,
+      round1Score: 0,
+      manualAdjustment: 0,
+      totalScore: 0,
+      timeTakenSec: 0,
+      completedAt: null
+    };
+    updateTeams([...teams, newTeam]);
+  };
+
+  const editTeam = (id: string, updated: Partial<Team>) => {
+    const newList = teams.map((t) => (t.id === id ? { ...t, ...updated } : t));
+    updateTeams(newList);
+  };
+
+  const deleteTeam = (id: string) => {
+    updateTeams(teams.filter((t) => t.id !== id));
+  };
+
+  const resetTeamsToDefault = () => {
+    updateTeams(DEFAULT_TEAMS);
+  };
+
   // Question Bank operations
   const updateQuestions = (newQuestions: Question[]) => {
     setQuestions(newQuestions);
@@ -337,6 +363,10 @@ export function useCompetitionStore() {
     adjustTeamScore,
     resetTeamScore,
     resetAllScores,
+    addTeam,
+    editTeam,
+    deleteTeam,
+    resetTeamsToDefault,
     addQuestion,
     editQuestion,
     deleteQuestion,

@@ -34,6 +34,10 @@ export const App: React.FC = () => {
     adjustTeamScore,
     resetTeamScore,
     resetAllScores,
+    addTeam,
+    editTeam,
+    deleteTeam,
+    resetTeamsToDefault,
     addQuestion,
     editQuestion,
     deleteQuestion,
@@ -131,6 +135,10 @@ export const App: React.FC = () => {
             onAdjustScore={adjustTeamScore}
             onResetTeamScore={resetTeamScore}
             onUpdateTeams={updateTeams}
+            onAddTeam={addTeam}
+            onEditTeam={editTeam}
+            onDeleteTeam={deleteTeam}
+            onResetTeamsToDefault={resetTeamsToDefault}
             onAddQuestion={addQuestion}
             onEditQuestion={editQuestion}
             onDeleteQuestion={deleteQuestion}

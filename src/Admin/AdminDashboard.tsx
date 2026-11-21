@@ -3,6 +3,7 @@ import { CompetitionState, Team, Question } from '../types';
 import { RoomController } from './RoomController';
 import { QuestionBank } from './QuestionBank';
 import { ScoreAdjuster } from './ScoreAdjuster';
+import { TeamManager } from './TeamManager';
 import { LiveLeaderboard } from '../Leaderboard/LiveLeaderboard';
 import { 
   ShieldCheck, 
@@ -14,7 +15,8 @@ import {
   LogOut, 
   ExternalLink,
   Copy,
-  Check
+  Check,
+  Users
 } from 'lucide-react';
 import { SUPABASE_URL } from '../lib/supabase';
 
@@ -29,6 +31,10 @@ interface AdminDashboardProps {
   onAdjustScore: (teamId: string, delta: number) => void;
   onResetTeamScore: (teamId: string) => void;
   onUpdateTeams: (newTeams: Team[]) => void;
+  onAddTeam: (teamData: Omit<Team, 'round1Score' | 'manualAdjustment' | 'totalScore' | 'timeTakenSec' | 'completedAt'>) => void;
+  onEditTeam: (id: string, updated: Partial<Team>) => void;
+  onDeleteTeam: (id: string) => void;
+  onResetTeamsToDefault: () => void;
   onAddQuestion: (q: Omit<Question, 'id'>) => void;
   onEditQuestion: (id: string, updated: Partial<Question>) => void;
   onDeleteQuestion: (id: string) => void;
@@ -37,7 +43,7 @@ interface AdminDashboardProps {
   onLogoutAdmin: () => void;
 }
 
-type TabType = 'room' | 'questions' | 'scores' | 'standings' | 'supabase';
+type TabType = 'room' | 'teams' | 'questions' | 'scores' | 'standings' | 'supabase';
 
 const SUPABASE_SCHEMA_SQL = `-- Technospark Spark Quest Database Schema for Supabase
 -- Run this in your Supabase SQL Editor:
@@ -99,6 +105,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onAdjustScore,
   onResetTeamScore,
   onUpdateTeams,
+  onAddTeam,
+  onEditTeam,
+  onDeleteTeam,
+  onResetTeamsToDefault,
   onAddQuestion,
   onEditQuestion,
   onDeleteQuestion,
@@ -173,6 +183,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </button>
 
         <button
+          onClick={() => setActiveTab('teams')}
+          className={`px-4 py-2.5 rounded-xl font-bold font-mono text-xs uppercase tracking-wider transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer ${
+            activeTab === 'teams'
+              ? 'bg-[#219EBC] text-[#011826] shadow-lg'
+              : 'bg-[#023047]/80 text-slate-300 hover:text-white border border-white/10'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Participants ({teams.length})</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('questions')}
           className={`px-4 py-2.5 rounded-xl font-bold font-mono text-xs uppercase tracking-wider transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer ${
             activeTab === 'questions'
@@ -231,6 +253,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onResetRound1={onResetRound1}
             onEndRound1={onEndRound1}
             onResetAllScores={onResetAllScores}
+          />
+        )}
+
+        {activeTab === 'teams' && (
+          <TeamManager
+            teams={teams}
+            onAddTeam={onAddTeam}
+            onEditTeam={onEditTeam}
+            onDeleteTeam={onDeleteTeam}
+            onResetToDefault={onResetTeamsToDefault}
           />
         )}
 
