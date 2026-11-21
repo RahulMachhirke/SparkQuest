@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Team } from '../types';
 import { soundEngine } from '../lib/sound';
-import { LogIn, Users, ShieldCheck, Sparkles, Building2, AlertCircle } from 'lucide-react';
+import { LogIn, Users, ShieldCheck, Sparkles, Building2, AlertCircle, Hash } from 'lucide-react';
 
 interface TeamLoginProps {
   teams: Team[];
@@ -9,43 +9,102 @@ interface TeamLoginProps {
 }
 
 export const TeamLogin: React.FC<TeamLoginProps> = ({ teams, onLogin }) => {
+  const [teamInput, setTeamInput] = useState<string>('');
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [passcode, setPasscode] = useState<string>('');
   const [error, setError] = useState<string>('');
 
+  // Helper to normalize strings for forgiving matching (e.g. "team07" -> "team07", "team-07" -> "team07")
+  const normalize = (str: string) => str.trim().toLowerCase().replace(/[-_\s]/g, '');
+
   const handleSelectTeam = (id: string) => {
     setSelectedTeamId(id);
-    const found = teams.find(t => t.id === id);
+    const found = teams.find((t) => t.id === id);
     if (found) {
-      setPasscode(found.passcode); // Auto-fill for friction-free onboarding or quick testing
+      setTeamInput(found.id);
+      setPasscode(found.passcode);
     }
     setError('');
   };
 
+  const handleTeamInputChange = (val: string) => {
+    setTeamInput(val);
+    setError('');
+    const norm = normalize(val);
+    if (!norm) {
+      setSelectedTeamId('');
+      return;
+    }
+
+    // Try to auto-resolve team from input
+    const matched = teams.find(
+      (t) =>
+        normalize(t.id) === norm ||
+        normalize(t.name) === norm ||
+        t.id.toLowerCase() === val.trim().toLowerCase()
+    );
+    if (matched) {
+      setSelectedTeamId(matched.id);
+      if (!passcode) {
+        setPasscode(matched.passcode);
+      }
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTeamId) {
-      setError('Please choose your Team from the list.');
-      return;
+    setError('');
+
+    let targetTeam: Team | undefined;
+
+    // 1. Try selected ID first
+    if (selectedTeamId) {
+      targetTeam = teams.find((t) => t.id === selectedTeamId);
     }
 
-    const team = teams.find(t => t.id === selectedTeamId);
-    if (!team) {
-      setError('Selected team not found in roster.');
-      return;
+    // 2. If not selected, try matching what user typed in teamInput
+    if (!targetTeam && teamInput.trim()) {
+      const normInput = normalize(teamInput);
+      targetTeam = teams.find(
+        (t) =>
+          normalize(t.id) === normInput ||
+          normalize(t.name) === normInput ||
+          normalize(t.id).includes(normInput)
+      );
     }
 
-    if (passcode.trim().toLowerCase() !== team.passcode.trim().toLowerCase()) {
-      setError('Invalid team passcode. Please check with your team lead or organizers.');
+    // 3. If still not found but passcode is provided, try resolving team by passcode!
+    if (!targetTeam && passcode.trim()) {
+      const normPass = normalize(passcode);
+      targetTeam = teams.find((t) => normalize(t.passcode) === normPass);
+    }
+
+    if (!targetTeam) {
+      setError(
+        `Team "${teamInput || passcode}" not found in registered competition roster. Please pick from the list below or check with coordinators.`
+      );
       soundEngine.wrong();
       return;
     }
 
+    // Validate passcode
+    const enteredPass = normalize(passcode);
+    const expectedPass = normalize(targetTeam.passcode);
+
+    if (enteredPass !== expectedPass) {
+      setError(
+        `Invalid passcode for ${targetTeam.name} (${targetTeam.id}). Please check with your team members.`
+      );
+      soundEngine.wrong();
+      return;
+    }
+
+    // Success!
     soundEngine.correct();
-    onLogin(team.id);
+    onLogin(targetTeam.id);
   };
 
-  const activeTeamObj = teams.find(t => t.id === selectedTeamId);
+  const activeTeamObj = teams.find((t) => t.id === selectedTeamId);
 
   return (
     <div className="w-full max-w-xl mx-auto px-4 py-8">
@@ -59,7 +118,7 @@ export const TeamLogin: React.FC<TeamLoginProps> = ({ teams, onLogin }) => {
           SPARK QUEST <span className="text-[#8ECAE6]">|</span> <span className="text-[#FB8500]">BYTE LOGIC</span>
         </h1>
         <p className="text-sm text-slate-300 mt-2 max-w-md mx-auto">
-          Department of Information Technology. Sign in with your official registered Team ID and passcode to enter the waiting arena.
+          Department of Information Technology. Sign in with your registered Team ID and passcode to enter the waiting arena.
         </p>
       </div>
 
@@ -73,7 +132,7 @@ export const TeamLogin: React.FC<TeamLoginProps> = ({ teams, onLogin }) => {
           </div>
           <div>
             <h2 className="text-lg font-bold text-white">Participant Team Sign-In</h2>
-            <p className="text-xs text-slate-400">Restricted to verified competition teams</p>
+            <p className="text-xs text-slate-400">Restricted to registered teams</p>
           </div>
         </div>
 
@@ -85,20 +144,44 @@ export const TeamLogin: React.FC<TeamLoginProps> = ({ teams, onLogin }) => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Team Selector */}
+          {/* Direct Team ID or Name Input */}
           <div>
             <label className="block text-xs font-mono uppercase tracking-wider text-[#8ECAE6] font-semibold mb-2">
-              Select Your Team
+              Team ID or Team Name
             </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={teamInput}
+                onChange={(e) => handleTeamInputChange(e.target.value)}
+                placeholder="Type e.g. team07, team-07, or Logic Loopers"
+                className="w-full bg-[#011826] border border-[#219EBC]/40 rounded-xl px-4 py-3 font-mono text-white text-sm focus:outline-none focus:border-[#FFB703] focus:ring-1 focus:ring-[#FFB703] transition-all"
+              />
+              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                <Hash className="w-4 h-4 text-[#8ECAE6]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Or Pick from Registered Roster Dropdown */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                Or Select From List:
+              </label>
+              <span className="text-[10px] font-mono text-[#8ECAE6]">
+                {teams.length} teams registered
+              </span>
+            </div>
             <select
               value={selectedTeamId}
               onChange={(e) => handleSelectTeam(e.target.value)}
-              className="w-full bg-[#011826] border border-[#219EBC]/40 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#FFB703] focus:ring-1 focus:ring-[#FFB703] transition-all cursor-pointer"
+              className="w-full bg-[#011826] border border-[#219EBC]/40 rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-[#FFB703] transition-all cursor-pointer"
             >
-              <option value="">-- Choose registered team --</option>
+              <option value="">-- Choose team from roster --</option>
               {teams.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.avatar} {t.name} ({t.college})
+                  {t.avatar} {t.name} ({t.id} • {t.college})
                 </option>
               ))}
             </select>
@@ -107,7 +190,7 @@ export const TeamLogin: React.FC<TeamLoginProps> = ({ teams, onLogin }) => {
           {/* Quick Select Badges */}
           <div>
             <div className="text-[11px] font-mono text-slate-400 mb-2">Quick Pick Roster:</div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 max-h-28 overflow-y-auto pr-1 scrollbar-thin">
               {teams.map((t) => {
                 const isSelected = selectedTeamId === t.id;
                 return (
@@ -123,21 +206,24 @@ export const TeamLogin: React.FC<TeamLoginProps> = ({ teams, onLogin }) => {
                   >
                     <span>{t.avatar}</span>
                     <span>{t.name}</span>
+                    <span className="text-[10px] font-mono opacity-70">({t.id})</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Team Preview if selected */}
+          {/* Team Preview if matched/selected */}
           {activeTeamObj && (
-            <div className="p-3.5 rounded-xl bg-[#011826]/70 border border-[#219EBC]/30 text-xs text-slate-300 space-y-1">
+            <div className="p-3.5 rounded-xl bg-[#011826]/80 border border-[#219EBC]/40 text-xs text-slate-300 space-y-1 animate-fadeIn">
               <div className="flex items-center justify-between text-white font-medium">
                 <span className="flex items-center gap-1.5 text-[#8ECAE6]">
                   <Building2 className="w-3.5 h-3.5" />
                   {activeTeamObj.college}
                 </span>
-                <span className="font-mono text-emerald-400">Team ID: {activeTeamObj.id}</span>
+                <span className="font-mono text-emerald-400 font-bold">
+                  Team ID: {activeTeamObj.id}
+                </span>
               </div>
               <div className="text-slate-400">
                 <strong className="text-slate-300">Members:</strong> {activeTeamObj.members}
@@ -155,7 +241,7 @@ export const TeamLogin: React.FC<TeamLoginProps> = ({ teams, onLogin }) => {
                 type="text"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                placeholder="Enter passcode (e.g. team01)"
+                placeholder="Enter passcode (e.g. team07)"
                 className="w-full bg-[#011826] border border-[#219EBC]/40 rounded-xl px-4 py-3 font-mono text-white text-sm focus:outline-none focus:border-[#FFB703] focus:ring-1 focus:ring-[#FFB703] transition-all"
               />
               <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">

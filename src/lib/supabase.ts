@@ -85,6 +85,71 @@ export const DEFAULT_TEAMS: Team[] = [
     totalScore: 0,
     timeTakenSec: 0,
     completedAt: null
+  },
+  {
+    id: "team-06",
+    name: "Algorithmic Aces",
+    passcode: "team06",
+    college: "COEP Tech",
+    members: "Devendra Patil, Meera Joshi",
+    avatar: "🚀",
+    round1Score: 0,
+    manualAdjustment: 0,
+    totalScore: 0,
+    timeTakenSec: 0,
+    completedAt: null
+  },
+  {
+    id: "team-07",
+    name: "Logic Loopers",
+    passcode: "team07",
+    college: "PCCOER Ravet",
+    members: "Aniket Shinde, Harshada Pawar, Omkar Kulkarni",
+    avatar: "🔥",
+    round1Score: 0,
+    manualAdjustment: 0,
+    totalScore: 0,
+    timeTakenSec: 0,
+    completedAt: null
+  },
+  {
+    id: "team-08",
+    name: "Code Crusaders",
+    passcode: "team08",
+    college: "DY Patil Akurdi",
+    members: "Sahil Shaikh, Rutuja More",
+    avatar: "🛡️",
+    round1Score: 0,
+    manualAdjustment: 0,
+    totalScore: 0,
+    timeTakenSec: 0,
+    completedAt: null
+  },
+  {
+    id: "team-09",
+    name: "Bit Flippers",
+    passcode: "team09",
+    college: "MIT-WPU",
+    members: "Pranav Dixit, Vaishnavi Kute",
+    avatar: "💎",
+    round1Score: 0,
+    manualAdjustment: 0,
+    totalScore: 0,
+    timeTakenSec: 0,
+    completedAt: null
+  },
+  {
+    id: "team-10",
+    name: "Cache Crushers",
+    passcode: "team10",
+    college: "PICT Pune",
+    members: "Chinmay Gokhale, Ishaan Roy",
+    avatar: "⚡",
+    round1Score: 0,
+    manualAdjustment: 0,
+    totalScore: 0,
+    timeTakenSec: 0,
+    completedAt: null
   }
 ];
 

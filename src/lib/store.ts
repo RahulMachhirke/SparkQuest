@@ -15,13 +15,24 @@ const syncChannel = typeof window !== 'undefined' && 'BroadcastChannel' in windo
   ? new BroadcastChannel('sparkquest_realtime_bus') 
   : null;
 
-// Initialize localStorage with seeds if empty
+// Initialize localStorage with seeds if empty, and merge any new seeds automatically
 export function getInitialTeams(): Team[] {
   if (typeof window === 'undefined') return DEFAULT_TEAMS;
   const saved = localStorage.getItem(STORAGE_KEYS.TEAMS);
   if (saved) {
     try {
-      return JSON.parse(saved);
+      const parsed: Team[] = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Merge missing defaults (e.g. team-06, team-07) so newly seeded teams appear immediately
+        const existingIdSet = new Set(parsed.map(t => t.id.toLowerCase().replace(/[-_\s]/g, '')));
+        const missing = DEFAULT_TEAMS.filter(t => !existingIdSet.has(t.id.toLowerCase().replace(/[-_\s]/g, '')));
+        if (missing.length > 0) {
+          const merged = [...parsed, ...missing];
+          localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(merged));
+          return merged;
+        }
+        return parsed;
+      }
     } catch (e) {
       console.error('Error parsing stored teams', e);
     }
