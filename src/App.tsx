@@ -60,7 +60,7 @@ export const App: React.FC = () => {
     );
   };
 
-  const [route, setRoute] = useState<'participant' | 'admin'>(() => isAdminRoute());
+  const [route, setRoute] = useState<'participant' | 'admin'>(() => isAdminRoute() ? 'admin' : 'participant');
 
   // Admin authentication state
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
