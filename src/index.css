@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --color-sky: #8ECAE6;
   --color-teal: #219EBC;
